@@ -139,14 +139,14 @@ private[finagle] object Message {
         // Currently we require the 3-tuple, but this is not
         // necessarily required.
         case Some(traceId) =>
-          val hd = ChannelBuffers.buffer(1+1+1+24+1+1+1)
+          val hd = ChannelBuffers.buffer(1+1+1+48+1+1+1)
           hd.writeByte(2) // 2 entries
 
           hd.writeByte(Keys.TraceId) // key 0 (traceid)
-          hd.writeByte(24) // key 0 size
-          hd.writeLong(traceId.spanId.toLong)
-          hd.writeLong(traceId.parentId.toLong)
-          hd.writeLong(traceId.traceId.toLong)
+          hd.writeByte(48) // key 0 size
+          hd.writeBytes(traceId.spanId.toString.getBytes(Charsets.Utf8))
+          hd.writeBytes(traceId.parentId.toString.getBytes(Charsets.Utf8))
+          hd.writeBytes(traceId.traceId.toString.getBytes(Charsets.Utf8))
 
           hd.writeByte(Keys.TraceFlag) // key 1 (traceflag)
           hd.writeByte(1) // key 1 size
@@ -418,9 +418,9 @@ private[finagle] object Message {
           if (vsize != 24)
             throw BadMessageException("bad traceid size %d".format(vsize))
           trace3 = Some(
-            SpanId(buf.readLong()),  // spanId
-            SpanId(buf.readLong()),  // parentId
-            SpanId(buf.readLong())  // traceId
+            SpanId(buf.toString(Charsets.Utf8)), // spanId
+            SpanId(buf.toString(Charsets.Utf8)), // parentId
+            SpanId(buf.toString(Charsets.Utf8)) // traceId
           )
 
         case Treq.Keys.TraceFlag =>

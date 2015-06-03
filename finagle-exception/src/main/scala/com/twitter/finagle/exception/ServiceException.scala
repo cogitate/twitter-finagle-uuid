@@ -35,7 +35,7 @@ sealed private[exception] case class ServiceException private[ServiceException] 
    * This is the only way to make new ServiceException so it can be guaranteed that none will
    * have fewer than the minimum elements per the chickadee specification.
    */
-  def this(name: String, e: Throwable, timestamp: Time, traceId: Long) = this(
+  def this(name: String, e: Throwable, timestamp: Time, traceId: String) = this(
     Map(
       "name" -> name,
       "exceptionContents" -> ExceptionContents(e).jsonValue,

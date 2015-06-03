@@ -1,5 +1,7 @@
 package com.twitter.finagle.zipkin.thrift
+import java.nio.ByteBuffer
 
+import com.twitter.io.Charsets
 import com.twitter.finagle.tracing.{Record, TraceId}
 import scala.util.Random
 
@@ -65,7 +67,8 @@ class Sampler {
   def sampleTrace(traceId: TraceId, sampleRate: Float): Option[Boolean] = {
     traceId.sampled match {
       case None =>
-        if (math.abs(traceId.traceId.toLong^Sampler.salt)%10000 < sampleRate*10000)
+        val buf = ByteBuffer.wrap(traceId.traceId.toString.getBytes(Charsets.Utf8)).asLongBuffer().get()
+        if (math.abs(buf^Sampler.salt)%10000 < sampleRate*10000)
           Sampler.SomeTrue
         else
           Sampler.SomeFalse

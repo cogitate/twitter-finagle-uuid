@@ -39,10 +39,10 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
   private static final TField BINARY_ANNOTATIONS_FIELD_DESC = new TField("binary_annotations", TType.LIST, (short)8);
   private static final TField DEBUG_FIELD_DESC = new TField("debug", TType.BOOL, (short)9);
 
-  public long trace_id;
+  public String trace_id;
   public String name;
-  public long id;
-  public long parent_id;
+  public String id;
+  public String parent_id;
   public List<Annotation> annotations;
   public List<BinaryAnnotation> binary_annotations;
   public boolean debug;
@@ -157,9 +157,9 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
   }
 
   public Span(
-    long trace_id,
+    String trace_id,
     String name,
-    long id,
+    String id,
     List<Annotation> annotations,
     List<BinaryAnnotation> binary_annotations,
     boolean debug)
@@ -212,23 +212,23 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
   @Override
   public void clear() {
     setTrace_idIsSet(false);
-    this.trace_id = 0;
+    this.trace_id = "";
     this.name = null;
     setIdIsSet(false);
-    this.id = 0;
+    this.id = "";
     setParent_idIsSet(false);
-    this.parent_id = 0;
+    this.parent_id = "";
     this.annotations = null;
     this.binary_annotations = null;
     setDebugIsSet(false);
     this.debug = false;
   }
 
-  public long getTrace_id() {
+  public String getTrace_id() {
     return this.trace_id;
   }
 
-  public Span setTrace_id(long trace_id) {
+  public Span setTrace_id(String trace_id) {
     this.trace_id = trace_id;
     setTrace_idIsSet(true);
     return this;
@@ -271,11 +271,11 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
     }
   }
 
-  public long getId() {
+  public String getId() {
     return this.id;
   }
 
-  public Span setId(long id) {
+  public Span setId(String id) {
     this.id = id;
     setIdIsSet(true);
     return this;
@@ -294,11 +294,11 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
     __isset_bit_vector.set(__ID_ISSET_ID, value);
   }
 
-  public long getParent_id() {
+  public String getParent_id() {
     return this.parent_id;
   }
 
-  public Span setParent_id(long parent_id) {
+  public Span setParent_id(String parent_id) {
     this.parent_id = parent_id;
     setParent_idIsSet(true);
     return this;
@@ -424,7 +424,7 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
       if (value == null) {
         unsetTrace_id();
       } else {
-        setTrace_id((Long)value);
+        setTrace_id((String)value);
       }
       break;
 
@@ -440,7 +440,7 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
       if (value == null) {
         unsetId();
       } else {
-        setId((Long)value);
+        setId((String)value);
       }
       break;
 
@@ -448,7 +448,7 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
       if (value == null) {
         unsetParent_id();
       } else {
-        setParent_id((Long)value);
+        setParent_id((String)value);
       }
       break;
 
@@ -711,8 +711,8 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
       }
       switch (field.id) {
         case 1: // TRACE_ID
-          if (field.type == TType.I64) {
-            this.trace_id = iprot.readI64();
+          if (field.type == TType.STRING) {
+            this.trace_id = iprot.readString();
             setTrace_idIsSet(true);
           } else {
             TProtocolUtil.skip(iprot, field.type);
@@ -726,16 +726,16 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
           }
           break;
         case 4: // ID
-          if (field.type == TType.I64) {
-            this.id = iprot.readI64();
+          if (field.type == TType.STRING) {
+            this.id = iprot.readString();
             setIdIsSet(true);
           } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
         case 5: // PARENT_ID
-          if (field.type == TType.I64) {
-            this.parent_id = iprot.readI64();
+          if (field.type == TType.STRING) {
+            this.parent_id = iprot.readString();
             setParent_idIsSet(true);
           } else {
             TProtocolUtil.skip(iprot, field.type);
@@ -801,7 +801,7 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
 
     oprot.writeStructBegin(STRUCT_DESC);
     oprot.writeFieldBegin(TRACE_ID_FIELD_DESC);
-    oprot.writeI64(this.trace_id);
+    oprot.writeString(this.trace_id);
     oprot.writeFieldEnd();
     if (this.name != null) {
       oprot.writeFieldBegin(NAME_FIELD_DESC);
@@ -809,11 +809,11 @@ public class Span implements TBase<Span, Span._Fields>, java.io.Serializable, Cl
       oprot.writeFieldEnd();
     }
     oprot.writeFieldBegin(ID_FIELD_DESC);
-    oprot.writeI64(this.id);
+    oprot.writeString(this.id);
     oprot.writeFieldEnd();
     if (isSetParent_id()) {
       oprot.writeFieldBegin(PARENT_ID_FIELD_DESC);
-      oprot.writeI64(this.parent_id);
+      oprot.writeString(this.parent_id);
       oprot.writeFieldEnd();
     }
     if (this.annotations != null) {

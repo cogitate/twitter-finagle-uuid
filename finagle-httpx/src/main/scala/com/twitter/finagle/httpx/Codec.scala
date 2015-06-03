@@ -6,6 +6,7 @@ package com.twitter.finagle.httpx
 
 import com.twitter.conversions.storage._
 import com.twitter.finagle._
+import com.twitter.finagle.param._
 import com.twitter.finagle.transport.Transport
 import com.twitter.finagle.httpx.codec._
 import com.twitter.finagle.httpx.filter.DtabFilter

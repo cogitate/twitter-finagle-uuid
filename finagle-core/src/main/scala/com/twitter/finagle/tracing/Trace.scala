@@ -16,6 +16,7 @@ package com.twitter.finagle.tracing
 import com.twitter.finagle.Init
 import com.twitter.util.{Future, Duration, Time, Local, Stopwatch, Try, Throw, Return}
 import java.net.InetSocketAddress
+import java.util.UUID
 import scala.util.Random
 import com.twitter.app.GlobalFlag
 import com.twitter.finagle.context.Contexts
@@ -50,46 +51,44 @@ object Trace {
 
   private[finagle] val idCtx = new Contexts.broadcast.Key[TraceId]("com.twitter.finagle.tracing.TraceContext") {
     private val local = new ThreadLocal[Array[Byte]] {
-      override def initialValue() = new Array[Byte](32)
+      override def initialValue() = new Array[Byte](56)
     }
 
-    def marshal(id: TraceId) =
+  def marshal(id: TraceId) =
       Buf.ByteArray.Owned(TraceId.serialize(id))
 
-    /**
-     * The wire format is (big-endian):
-     *     ''spanId:8 parentId:8 traceId:8 flags:8''
-     */
-    def tryUnmarshal(body: Buf): Try[TraceId] = {
-      if (body.length != 32)
-        return Throw(new IllegalArgumentException("Expected 32 bytes"))
+  /**
+   * The wire format is (big-endian):
+   *     ''spanId:16 parentId:16 traceId:16 flags:8''
+  */
+  def tryUnmarshal(body: Buf): Try[TraceId] = {
+        if (body.length != 56)
+            return Throw(new IllegalArgumentException("Expected 56 bytes"))
+        val bytes = local.get()
+        body.write(bytes, 0)
 
-      val bytes = local.get()
-      body.write(bytes, 0)
+        val span64 = ByteArrays.get128be(bytes, 0)
+        val parent64 = ByteArrays.get128be(bytes, 16)
+        val trace64 = ByteArrays.get128be(bytes, 32)
+        val flags64 = ByteArrays.get128be(bytes, 48)
 
-      val span64 = ByteArrays.get64be(bytes, 0)
-      val parent64 = ByteArrays.get64be(bytes, 8)
-      val trace64 = ByteArrays.get64be(bytes, 16)
-      val flags64 = ByteArrays.get64be(bytes, 24)
+        val flags = Flags(flags64.toLong)
+        val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
+            Some(flags.isFlagSet(Flags.Sampled))
+        } else None
 
-      val flags = Flags(flags64)
-      val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
-        Some(flags.isFlagSet(Flags.Sampled))
-      } else None
-
-      val traceId = TraceId(
-        if (trace64 == parent64) None else Some(SpanId(trace64)),
-        if (parent64 == span64) None else Some(SpanId(parent64)),
-        SpanId(span64),
-        sampled,
-        flags)
-
-      Return(traceId)
-    }
+        val traceId = TraceId(
+                if (trace64 == parent64) None else Some(SpanId(trace64)),
+                if (parent64 == span64) None else Some(SpanId(parent64)),
+                SpanId(span64),
+                sampled,
+                flags)
+        Return(traceId)
+      }
   }
 
-  private val rng = new Random
-  private val defaultId = TraceId(None, None, SpanId(rng.nextLong()), None, Flags())
+  private def random: String = UUID.randomUUID().toString
+  private val defaultId = TraceId(None, None, SpanId(random), None, Flags())
   @volatile private var tracingEnabled = true
 
   private def ctx: TraceCtx = Contexts.local.get(traceCtx) match {
@@ -142,7 +141,7 @@ object Trace {
     val currentId = idOption
     TraceId(currentId map { _.traceId },
       currentId map { _.spanId },
-      SpanId(rng.nextLong()),
+      SpanId(random),
       currentId map { _.sampled } getOrElse None,
       currentId map { _.flags} getOrElse Flags())
   }

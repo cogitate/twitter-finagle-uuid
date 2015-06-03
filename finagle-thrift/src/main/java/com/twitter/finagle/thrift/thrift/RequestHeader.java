@@ -45,9 +45,9 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
   private static final TField DEST_FIELD_DESC = new TField("dest", TType.STRING, (short)9);
   private static final TField DELEGATIONS_FIELD_DESC = new TField("delegations", TType.LIST, (short)10);
 
-  public long trace_id;
-  public long span_id;
-  public long parent_span_id;
+  public String trace_id;
+  public String span_id;
+  public String parent_span_id;
   public boolean sampled;
   public ClientId client_id;
   public long flags;
@@ -176,8 +176,8 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
   }
 
   public RequestHeader(
-    long trace_id,
-    long span_id,
+    String trace_id,
+    String span_id,
     List<RequestContext> contexts)
   {
     this();
@@ -228,11 +228,11 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
   @Override
   public void clear() {
     setTrace_idIsSet(false);
-    this.trace_id = 0;
+    this.trace_id = "";
     setSpan_idIsSet(false);
-    this.span_id = 0;
+    this.span_id = "";
     setParent_span_idIsSet(false);
-    this.parent_span_id = 0;
+    this.parent_span_id = "";
     setSampledIsSet(false);
     this.sampled = false;
     this.client_id = null;
@@ -243,11 +243,11 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     this.delegations = null;
   }
 
-  public long getTrace_id() {
+  public String getTrace_id() {
     return this.trace_id;
   }
 
-  public RequestHeader setTrace_id(long trace_id) {
+  public RequestHeader setTrace_id(String trace_id) {
     this.trace_id = trace_id;
     setTrace_idIsSet(true);
     return this;
@@ -266,11 +266,11 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     __isset_bit_vector.set(__TRACE_ID_ISSET_ID, value);
   }
 
-  public long getSpan_id() {
+  public String getSpan_id() {
     return this.span_id;
   }
 
-  public RequestHeader setSpan_id(long span_id) {
+  public RequestHeader setSpan_id(String span_id) {
     this.span_id = span_id;
     setSpan_idIsSet(true);
     return this;
@@ -289,11 +289,11 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
     __isset_bit_vector.set(__SPAN_ID_ISSET_ID, value);
   }
 
-  public long getParent_span_id() {
+  public String getParent_span_id() {
     return this.parent_span_id;
   }
 
-  public RequestHeader setParent_span_id(long parent_span_id) {
+  public RequestHeader setParent_span_id(String parent_span_id) {
     this.parent_span_id = parent_span_id;
     setParent_span_idIsSet(true);
     return this;
@@ -490,7 +490,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       if (value == null) {
         unsetTrace_id();
       } else {
-        setTrace_id((Long)value);
+        setTrace_id((String)value);
       }
       break;
 
@@ -498,7 +498,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       if (value == null) {
         unsetSpan_id();
       } else {
-        setSpan_id((Long)value);
+        setSpan_id((String)value);
       }
       break;
 
@@ -506,7 +506,7 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       if (value == null) {
         unsetParent_span_id();
       } else {
-        setParent_span_id((Long)value);
+        setParent_span_id((String)value);
       }
       break;
 
@@ -841,24 +841,24 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
       }
       switch (field.id) {
         case 1: // TRACE_ID
-          if (field.type == TType.I64) {
-            this.trace_id = iprot.readI64();
+          if (field.type == TType.STRING) {
+            this.trace_id = iprot.readString();
             setTrace_idIsSet(true);
           } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
         case 2: // SPAN_ID
-          if (field.type == TType.I64) {
-            this.span_id = iprot.readI64();
+          if (field.type == TType.STRING) {
+            this.span_id = iprot.readString();
             setSpan_idIsSet(true);
           } else {
             TProtocolUtil.skip(iprot, field.type);
           }
           break;
         case 3: // PARENT_SPAN_ID
-          if (field.type == TType.I64) {
-            this.parent_span_id = iprot.readI64();
+          if (field.type == TType.STRING) {
+            this.parent_span_id = iprot.readString();
             setParent_span_idIsSet(true);
           } else {
             TProtocolUtil.skip(iprot, field.type);
@@ -947,14 +947,14 @@ public class RequestHeader implements TBase<RequestHeader, RequestHeader._Fields
 
     oprot.writeStructBegin(STRUCT_DESC);
     oprot.writeFieldBegin(TRACE_ID_FIELD_DESC);
-    oprot.writeI64(this.trace_id);
+    oprot.writeString(this.trace_id);
     oprot.writeFieldEnd();
     oprot.writeFieldBegin(SPAN_ID_FIELD_DESC);
-    oprot.writeI64(this.span_id);
+    oprot.writeString(this.span_id);
     oprot.writeFieldEnd();
     if (isSetParent_span_id()) {
       oprot.writeFieldBegin(PARENT_SPAN_ID_FIELD_DESC);
-      oprot.writeI64(this.parent_span_id);
+      oprot.writeString(this.parent_span_id);
       oprot.writeFieldEnd();
     }
     if (isSetSampled()) {

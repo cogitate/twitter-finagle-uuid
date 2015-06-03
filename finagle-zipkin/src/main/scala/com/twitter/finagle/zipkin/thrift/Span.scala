@@ -49,12 +49,12 @@ case class Span(
   def toThrift: thrift.Span = {
     val span = new thrift.Span
 
-    span.setId(traceId.spanId.toLong)
+    span.setId(traceId.spanId.toString)
     traceId._parentId match {
-      case Some(id) => span.setParent_id(id.toLong)
+      case Some(id) => span.setParent_id(id.toString)
       case None => ()
     }
-    span.setTrace_id(traceId.traceId.toLong)
+    span.setTrace_id(traceId.traceId.toString)
     span.setName(name)
     span.setDebug(traceId.flags.isDebug)
 

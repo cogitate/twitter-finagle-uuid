@@ -43,9 +43,9 @@ private[thrift] class TTwitterClientFilter(
       case None =>
     }
 
-    header.setSpan_id(Trace.id.spanId.toLong)
-    Trace.id._parentId foreach { id => header.setParent_span_id(id.toLong) }
-    header.setTrace_id(Trace.id.traceId.toLong)
+    header.setSpan_id(Trace.id.spanId.toString)
+    Trace.id._parentId foreach { id => header.setParent_span_id(id.toString) }
+    header.setTrace_id(Trace.id.traceId.toString)
     header.setFlags(Trace.id.flags.toLong)
 
     Trace.id.sampled match {

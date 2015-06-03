@@ -1,7 +1,6 @@
 package com.twitter.finagle.tracing
 
 import com.twitter.finagle.util.ByteArrays
-import com.twitter.util.RichU64String
 import com.twitter.util.{Try, Return, Throw}
 import com.twitter.util.NonFatal
 
@@ -11,47 +10,22 @@ import com.twitter.util.NonFatal
  * and traceId).
  */
 
-final class SpanId(val self: Long) extends Proxy {
-  def toLong = self
-
-  override def toString: String = SpanId.toString(self)
+final class SpanId(val self: String) extends Proxy {
+  override def toString: String = self
 }
 
 object SpanId {
-  // StringBuilder.appendAll(char..) seems to be faster than
-  // StringBuilder.append(string..)
-  private val lut: Array[Array[Char]] = (
-    for (b <- Byte.MinValue to Byte.MaxValue) yield {
-      val bb = if (b < 0) b + 256 else b
-      val s = "%02x".format(bb)
-      Array(s(0), s(1))
-    }
-  ).toArray
+  def apply(spanId: String): SpanId = new SpanId(spanId)
 
-  private def byteToChars(b: Byte): Array[Char] = lut(b+128)
-
-  // This is invoked a lot, so they need to be fast.
-  def toString(l: Long): String = {
-    val b = new StringBuilder(16)
-    b.appendAll(byteToChars((l>>56 & 0xff).toByte))
-    b.appendAll(byteToChars((l>>48 & 0xff).toByte))
-    b.appendAll(byteToChars((l>>40 & 0xff).toByte))
-    b.appendAll(byteToChars((l>>32 & 0xff).toByte))
-    b.appendAll(byteToChars((l>>24 & 0xff).toByte))
-    b.appendAll(byteToChars((l>>16 & 0xff).toByte))
-    b.appendAll(byteToChars((l>>8 & 0xff).toByte))
-    b.appendAll(byteToChars((l & 0xff).toByte))
-    b.toString
+  def fromString(spanId: String): Option[SpanId] ={
+   try {
+     Some(SpanId(spanId))
+   } catch {
+     case NonFatal(_) => None
+   }
   }
 
-  def apply(spanId: Long): SpanId = new SpanId(spanId)
-
-  def fromString(spanId: String): Option[SpanId] =
-    try {
-      Some(SpanId(new RichU64String(spanId).toU64Long))
-    } catch {
-      case NonFatal(_) => None
-    }
+  override def toString: String = SpanId.toString
 }
 
 object TraceId {
@@ -78,12 +52,11 @@ object TraceId {
       case Some(false) =>
         traceId.flags.setFlag(Flags.SamplingKnown)
     }
-
-    val bytes = new Array[Byte](32)
-    ByteArrays.put64be(bytes, 0, traceId.spanId.toLong)
-    ByteArrays.put64be(bytes, 8, traceId.parentId.toLong)
-    ByteArrays.put64be(bytes, 16, traceId.traceId.toLong)
-    ByteArrays.put64be(bytes, 24, flags.toLong)
+    val bytes =  new Array[Byte](56)
+    ByteArrays.put128be(bytes, 0, traceId.spanId.toString)
+    ByteArrays.put128be(bytes, 16, traceId.parentId.toString)
+    ByteArrays.put128be(bytes, 32, traceId.traceId.toString)
+    ByteArrays.put128be(bytes, 48, flags.toString)
     bytes
   }
 
@@ -91,15 +64,15 @@ object TraceId {
    * Deserialize a TraceId from an array of bytes.
    */
   def deserialize(bytes: Array[Byte]): Try[TraceId] = {
-    if (bytes.length != 32) {
-      Throw(new IllegalArgumentException("Expected 32 bytes"))
+    if (bytes.length != 56) {
+      Throw(new IllegalArgumentException("Expected 56 bytes"))
     } else {
-      val span64 = ByteArrays.get64be(bytes, 0)
-      val parent64 = ByteArrays.get64be(bytes, 8)
-      val trace64 = ByteArrays.get64be(bytes, 16)
-      val flags64 = ByteArrays.get64be(bytes, 24)
+      val span64 = ByteArrays.get128be(bytes, 0)
+      val parent64 = ByteArrays.get128be(bytes, 16)
+      val trace64 = ByteArrays.get128be(bytes, 32)
+      val flags64 = ByteArrays.get128be(bytes, 48)
 
-      val flags = Flags(flags64)
+      val flags = Flags(flags64.toLong)
       val sampled = if (flags.isFlagSet(Flags.SamplingKnown)) {
         Some(flags.isFlagSet(Flags.Sampled))
       } else None

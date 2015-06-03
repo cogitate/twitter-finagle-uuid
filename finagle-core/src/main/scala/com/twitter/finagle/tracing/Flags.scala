@@ -59,4 +59,6 @@ case class Flags(flags: Long) {
    * @return a long that we can use to pass in the tracing header
    */
   def toLong = flags
+
+  override def toString: String = flags.toString
 }

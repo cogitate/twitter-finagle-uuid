@@ -6,6 +6,7 @@ import com.twitter.finagle.stats.NullStatsReceiver
 import com.twitter.finagle.tracing._
 import com.twitter.finagle.zipkin.thriftscala._
 import com.twitter.util._
+import java.util.UUID
 import java.net.{InetAddress, InetSocketAddress}
 
 import org.scalatest.FunSuite
@@ -14,8 +15,10 @@ import org.junit.runner.RunWith
 
 @RunWith(classOf[JUnitRunner])
 class RawZipkinTracerTest extends FunSuite {
-
-  val traceId = TraceId(Some(SpanId(123)), Some(SpanId(123)), SpanId(123), None, Flags().setDebug)
+  private def random: String = UUID.randomUUID().toString
+  val uuid0 = random()
+  val uuid1 = random()
+  val traceId = TraceId(Some(SpanId(uuid0)), Some(SpanId(123)), SpanId(123), None, Flags().setDebug)
 
   class ScribeClient extends Scribe.FutureIface {
     var messages: Seq[LogEntry] = Seq.empty[LogEntry]
@@ -34,11 +37,11 @@ class RawZipkinTracerTest extends FunSuite {
     val remoteEndpoint = Endpoint(333, 22)
 
     val annotations = Seq(
-      ZipkinAnnotation(Time.fromSeconds(123), "cs", localEndpoint, None),
+      ZipkinAnnotation(Time.fromSeconds(uuid0), "cs", localEndpoint, None),
       ZipkinAnnotation(Time.fromSeconds(126), "cr", localEndpoint, None),
-      ZipkinAnnotation(Time.fromSeconds(123), "ss", remoteEndpoint, None),
+      ZipkinAnnotation(Time.fromSeconds(uuid0), "ss", remoteEndpoint, None),
       ZipkinAnnotation(Time.fromSeconds(124), "sr", remoteEndpoint, None),
-      ZipkinAnnotation(Time.fromSeconds(123), "llamas", localEndpoint, None)
+      ZipkinAnnotation(Time.fromSeconds(uuid0), "llamas", localEndpoint, None)
     )
 
     val span = Span(
@@ -71,19 +74,19 @@ class RawZipkinTracerTest extends FunSuite {
     val remoteAddress = InetAddress.getByAddress(Array.fill(4) { 10 })
     val port1 = 80 // never bound
     val port2 = 53 // ditto
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientAddr(new InetSocketAddress(localAddress, port1))))
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.LocalAddr(new InetSocketAddress(localAddress, port1))))
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ServerAddr(new InetSocketAddress(remoteAddress, port2))))
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.Rpcname("service", "method")))
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("i16", 16.toShort)))
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("i32", 32)))
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("i64", 64L)))
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("double", 123.3d)))
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.BinaryAnnotation("string", "woopie")))
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.Message("boo")))
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.Message("boohoo"), Some(1.second)))
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientSend()))
-    tracer.record(Record(traceId, Time.fromSeconds(123), Annotation.ClientRecv()))
+    tracer.record(Record(traceId, Time.fromSeconds(uuid0), Annotation.ClientAddr(new InetSocketAddress(localAddress, port1))))
+    tracer.record(Record(traceId, Time.fromSeconds(uuid0), Annotation.LocalAddr(new InetSocketAddress(localAddress, port1))))
+    tracer.record(Record(traceId, Time.fromSeconds(uuid0), Annotation.ServerAddr(new InetSocketAddress(remoteAddress, port2))))
+    tracer.record(Record(traceId, Time.fromSeconds(uuid0), Annotation.Rpcname("service", "method")))
+    tracer.record(Record(traceId, Time.fromSeconds(uuid0), Annotation.BinaryAnnotation("i16", 16.toShort)))
+    tracer.record(Record(traceId, Time.fromSeconds(uuid0), Annotation.BinaryAnnotation("i32", 32)))
+    tracer.record(Record(traceId, Time.fromSeconds(uuid0), Annotation.BinaryAnnotation("i64", 64L)))
+    tracer.record(Record(traceId, Time.fromSeconds(uuid0), Annotation.BinaryAnnotation("double", 123.3d)))
+    tracer.record(Record(traceId, Time.fromSeconds(uuid0), Annotation.BinaryAnnotation("string", "woopie")))
+    tracer.record(Record(traceId, Time.fromSeconds(uuid0), Annotation.Message("boo")))
+    tracer.record(Record(traceId, Time.fromSeconds(uuid0), Annotation.Message("boohoo"), Some(1.second)))
+    tracer.record(Record(traceId, Time.fromSeconds(uuid0), Annotation.ClientSend()))
+    tracer.record(Record(traceId, Time.fromSeconds(uuid0), Annotation.ClientRecv()))
 
     // Note: Since ports are ephemeral, we can't hardcode expected message.
     assert(scribe.messages.size === 1)

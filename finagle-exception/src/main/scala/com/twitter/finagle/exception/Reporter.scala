@@ -150,7 +150,7 @@ sealed case class Reporter(
    * endpoint).
    */
   def createEntry(e: Throwable) = {
-    var se = new ServiceException(serviceName, e, Time.now, Trace.id.traceId.toLong)
+    var se = new ServiceException(serviceName, e, Time.now, Trace.id.traceId.toString)
 
     sourceAddress foreach { sa => se = se withSource sa }
     clientAddress foreach { ca => se = se withClient ca }
